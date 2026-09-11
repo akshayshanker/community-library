@@ -1,8 +1,12 @@
-# A Community Library of Baseline Models
+# Community Library of Baseline Economic Models
 
-A community library of the field's baseline models, implemented and documented across the toolkits that can solve them — same model, multiple toolkits, side by side. Each implementation is authored and maintained by the project that built the toolkit.
+The Community Library is an open-source library of baseline computational models
+in computational economics, implemented and documented across the toolkits.
+For each model the library documents the model statement and the calibration, so that implementations in different toolkits can be compared side by side.
+Each implementation is authored and maintained by the project that built the toolkit and is reviewed by the community.
 
-The library is hosted by QuantEcon and published at **<https://quantecon.github.io/community-library/>**. It began as Project B of [SCE Working Group 1 on Language and Formal Semantics](https://github.com/econ-ark/sce-wg-1) and now runs independently of the group, which continues to publish the baseline set and templates. This repository hosts the community website and the notebooks submitted by participating projects.
+The library is hosted by QuantEcon and published at **<https://quantecon.github.io/community-library/>**. It is run in collaboration with the [SCE Working Group 1 on Language and Formal Semantics](https://github.com/econ-ark/sce-wg-1).
+This repository holds the community website and the notebooks submitted by participating projects.
 
 ## How it works
 
