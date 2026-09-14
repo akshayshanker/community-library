@@ -5,10 +5,11 @@ infinite-horizon model in Carroll and Shanker's *Theoretical Foundations of
 Buffer Stock Saving* and compare the consumption function and target level
 of resources across toolkits.
 
-Read the [lecture](template.md), use the [notebook](template.ipynb) to write
-your solution, or open the [PDF](template.pdf). All three contain the same
-model and exercises. The current template is **version 0.1, a draft**; its
-[provisional choices](#draft-decisions) are recorded below.
+The [PDF](template.pdf) gives a concise specification in three sections:
+model theory, calibration and numerical concerns. The [notebook](template.ipynb)
+adds exercises and result reporting for your solution; both are generated
+from [one source](template.md). The current template is **version 0.1, a draft**;
+its [provisional choices](#draft-decisions) are recorded below.
 
 ## What to submit
 

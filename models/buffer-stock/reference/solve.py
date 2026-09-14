@@ -3,11 +3,12 @@
 Run from this directory: python solve.py
 Results are written beside this script in results/.
 
-Notation follows the template: m is normalised market resources, c
-normalised consumption, a normalised end-of-period assets, psi and theta
-the permanent and transitory income shocks, R the interest factor, G the
-permanent-income growth factor, beta the discount factor, rho relative
-risk aversion and wp the probability of the zero-income event. The paper
+Code names map to the template as follows: m is normalised market
+resources, c consumption and a end-of-period assets. psi and theta are
+the permanent and full transitory shocks (psi and bold xi in the paper);
+rho is relative risk aversion (gamma in the paper). R is the interest
+factor, G permanent-income growth, beta the discount factor and wp the
+probability of the zero-income event. The paper
 is Carroll and Shanker, "Theoretical Foundations of Buffer Stock Saving";
 equation and table names refer to its LaTeX source.
 """

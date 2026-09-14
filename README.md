@@ -13,10 +13,11 @@ the group, which continues to publish the baseline models and templates.
 ## Start with a model
 
 The [buffer stock saving guide](models/buffer-stock/README.md) explains how
-to contribute the first model. Read the [lecture](models/buffer-stock/template.md),
-then complete a copy of its [notebook](models/buffer-stock/template.ipynb)
-in your toolkit. The [PDF](models/buffer-stock/template.pdf) contains the
-same lecture for reading offline.
+to contribute the first model. The [PDF](models/buffer-stock/template.pdf)
+gives a concise specification in three sections: model theory, calibration
+and numerical concerns. The [notebook](models/buffer-stock/template.ipynb)
+adds exercises and result reporting for completion in your toolkit. Both
+are generated from [one source](models/buffer-stock/template.md).
 
 A buffer stock submission contains a completed tutorial, a short record of
 the authors and numerical settings, and three result tables. The model's

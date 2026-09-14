@@ -34,7 +34,7 @@ asset grid points, linear interpolation, and an infinite horizon.
 | Setting | Value |
 | --- | --- |
 | HARK version | 0.17.1 (Python 3.12.7, numpy 2.3.5, scipy 1.17.1) |
-| Shock discretisation | 7 equally probable positive values for each of ψ and Θ; θ = 0 with probability ℘, otherwise Θ/(1 − ℘) |
+| Shock discretisation | 7 equally probable positive values for each of $\psi$ and $\theta$; $\boldsymbol{\xi}=0$ with probability $\wp$, otherwise $\theta/(1-\wp)$ |
 | Asset grid | 960 points from 0.001 to 20, nested exponential spacing (nesting factor 3), plus the natural borrowing constraint at zero |
 | Interpolation of c | linear |
 | Horizon | infinite; backward iteration until the policy moves by less than 1e-6 |
@@ -48,10 +48,16 @@ The following table maps the template's symbols to HARK's parameter names.
 | 𝒢 | `PermGroFac` | 1.03 |
 | 𝖱 | `Rfree` | 1.04 |
 | β | `DiscFac` | 0.96 |
-| ρ | `CRRA` | 2 |
+| γ | `CRRA` | 2 |
 | ℘ | `UnempPrb` (with `IncUnemp = 0`) | 0.005 |
 | σ_ψ | `PermShkStd` | 0.1 |
 | σ_θ | `TranShkStd` | 0.1 |
+
+The December 2025 paper uses $\gamma$ for relative risk aversion,
+$\boldsymbol{\xi}$ for the full transitory shock and $\theta$ for its positive
+component before rescaling. The reference code retains `rho` for $\gamma$
+and `theta` for $\boldsymbol{\xi}$; the CSV row `E_psi_1mrho` retains its name
+and reports $\mathbb{E}[\psi^{1-\gamma}]$.
 
 Two facts about HARK's output matter for reading the cross-checks in
 [recorded values](results/reference_values.json). HARK's `mNrmTrg` is the template's target m̂, the
