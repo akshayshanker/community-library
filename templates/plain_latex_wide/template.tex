@@ -68,9 +68,11 @@
   [# if doc.authors | length > 0 #][-doc.authors|join(" and ", "name")-]\\[0.5em][# endif #]
   {\small\itshape Society for Computational Economics Working Group No.~1 on Language and Formal Semantics}}}
 
+[# if doc.date #]
 \date{\ifcase [-doc.date.month-] \or January\or February\or March\or
   April\or May\or June\or July\or August\or September\or October\or
   November\or December\fi~[-doc.date.day-], [-doc.date.year-]}
+[# endif #]
 
 \begin{document}
 \maketitle
