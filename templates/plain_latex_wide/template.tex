@@ -62,7 +62,8 @@
 
 \title{[-doc.title-][# if doc.subtitle #]\\[0.4em]{\large [-doc.subtitle-]}[# endif #]}
 
-\author{\parbox{0.85\textwidth}{\centering [-doc.authors|join(" and ", "name")-]\\[0.5em]
+\author{\parbox{0.85\textwidth}{\centering
+  [# if doc.authors | length > 0 #][-doc.authors|join(" and ", "name")-]\\[0.5em][# endif #]
   {\small\itshape Society for Computational Economics Working Group No.~1 on Language and Formal Semantics}}}
 
 \date{\ifcase [-doc.date.month-] \or January\or February\or March\or

@@ -2,8 +2,6 @@ version: 1
 project:
   title: Buffer stock saving
   description: Baseline template for the buffer stock saving model in the QuantEcon Community Library
-  authors:
-    - name: Akshay Shanker
   license:
     content: CC-BY-4.0
   toc:

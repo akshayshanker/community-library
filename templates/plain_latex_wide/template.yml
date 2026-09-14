@@ -17,7 +17,7 @@ doc:
   - id: title
     required: true
   - id: authors
-    required: true
+    required: false
   - id: date
   - id: bibliography
 options:

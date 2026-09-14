@@ -1,8 +1,6 @@
 ---
 title: Buffer stock saving
 subtitle: Baseline template, version 0.1 (draft)
-authors:
-  - name: Akshay Shanker
 date: "2026-09-14"
 license: CC-BY-4.0
 exports:
@@ -39,7 +37,9 @@ jupytext:
 
 ## 1. Model theory
 
-We consider a consumer who saves in one risk-free asset and receives labour income with permanent and transitory shocks. Following Carroll and Shanker, *Theoretical Foundations of Buffer Stock Saving*, version of 5 December 2025 ([paper and source](https://github.com/econ-ark/BufferStockTheory)), we obtain the stationary solution as the limit of finite-horizon problems. There is no mortality or bequest motive.
+We consider a consumer who saves in one risk-free asset and receives labour income with permanent and transitory shocks, following Carroll's buffer-stock models (1992, 1997).[^carroll] We use the model and notation of Carroll and Shanker, [*Theoretical Foundations of Buffer Stock Saving*](https://econ-ark.github.io/BufferStockTheory/BufferStockTheory.pdf), version of 5 December 2025. The stationary solution is the limit of finite-horizon problems, with no mortality or bequest motive.
+
+[^carroll]: Carroll, C. D. (1992), [“The Buffer-Stock Theory of Saving: Some Macroeconomic Evidence”](https://www.brookings.edu/articles/the-buffer-stock-theory-of-saving-some-macroeconomic-evidence/), *Brookings Papers on Economic Activity*, 1992(2), 61–156; Carroll, C. D. (1997), [“Buffer-Stock Saving and the Life Cycle/Permanent Income Hypothesis”](https://academic.oup.com/qje/article-abstract/112/1/1/1870884), *Quarterly Journal of Economics*, 112(1), 1–55.
 
 The consumer has CRRA utility $\mathrm{u}(c)=c^{1-\gamma}/(1-\gamma)$, with relative risk aversion $\gamma>1$ and discount factor $\beta>0$. Bold Latin letters denote levels. Permanent income $\boldsymbol{p}_t$ grows by $\tilde{\mathcal{G}}_{t+1}=\mathcal{G}\psi_{t+1}$, where $\mathcal{G}>0$ is deterministic growth and $\psi$ is a permanent shock. Labour income is $\boldsymbol{y}_t=\boldsymbol{p}_t\pmb{\xi}_t$, with transitory shock
 

@@ -41,7 +41,7 @@ reference computation is unnecessary.
 
 ## Complete the tutorial
 
-1. Copy `template.ipynb` into your toolkit directory as `tutorial.ipynb`. Use the notebook kernel appropriate to your language and translate the supplied Python cells when needed. List the implementation authors while retaining credit to the template author, Akshay Shanker.
+1. Copy `template.ipynb` into your toolkit directory as `tutorial.ipynb`. Use the notebook kernel appropriate to your language and translate the supplied Python cells when needed. List the implementation authors and retain the template's source-paper citations.
 2. Complete the exercises in order using the stated model and calibration. Explain the numerical method, record the shock approximation and grids, and describe any departures from the model in the author's notes.
 3. Write the three CSV files from your computed results and complete `metadata.yml`. Run the notebook from its own directory so that `results/` refers to the files alongside it. Use the comparison cell to report differences from the reference and explain differences beyond the stated tolerances.
 4. Restart the kernel and run the completed notebook from beginning to end. Save its outputs and open a pull request adding your toolkit directory.
@@ -56,8 +56,8 @@ in this first phase.
 
 Copy the following example into `metadata.yml` and replace the descriptions
 in angle brackets. The `authors` entries credit the people who wrote the
-implementation; `template_author` credits the author of the shared lecture.
-The template version identifies the model and reporting conventions you used.
+implementation. The template source and version identify the model and
+reporting conventions you used.
 
 ```yaml
 toolkit: "<toolkit name>"
@@ -66,7 +66,6 @@ authors:
   - name: "<implementation author>"
 date: "<YYYY-MM-DD>"
 template_version: "0.1"
-template_author: "Akshay Shanker"
 template_source: "https://github.com/QuantEcon/community-library/tree/main/models/buffer-stock"
 software: "<language version and package versions>"
 method: "<solution method and convergence criterion>"
