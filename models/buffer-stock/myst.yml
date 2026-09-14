@@ -5,6 +5,6 @@ project:
   license:
     content: CC-BY-4.0
   toc:
-    - file: template.md
+    - file: model-description.md
 site:
   template: book-theme

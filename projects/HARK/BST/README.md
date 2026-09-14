@@ -2,7 +2,7 @@
 
 Open [tutorial.ipynb](tutorial.ipynb) for the runnable example. The notebook
 contains the HARK settings and calculations; it imports no local Python modules.
-The theory and calibration are in the [model description](../../../models/buffer-stock/template.md).
+The theory and calibration are in the [model description](../../../models/buffer-stock/model-description.md).
 The calculation follows the [paper's HARK notebook](https://github.com/econ-ark/BufferStockTheory/blob/master/Code/Python/BufferStockTheory-Problems-and-Solutions-Source.ipynb).
 
 Install the packages, then open the notebook in Jupyter or your editor using

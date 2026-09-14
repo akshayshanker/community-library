@@ -1,7 +1,7 @@
 # Buffer stock saving
 
-Read the [model description](template.md) or its [three-page PDF](template.pdf)
-for the theory, calibration and numerical considerations. Keep the stated
+Read the [model description](model-description.md) or its [PDF](model-description.pdf)
+for the theory, calibration and numerical solution. Keep the stated
 model and calibration fixed, and choose the solution method, prose and
 runnable format that suit your toolkit. The
 [HARK notebook](../../projects/HARK/BST/tutorial.ipynb) is one example.
@@ -136,7 +136,7 @@ toolkits or compare run times.
 
 ## Maintaining the model description
 
-Edit `template.md` and build its PDF from `models/buffer-stock/`:
+Edit `model-description.md` and build its PDF from `models/buffer-stock/`:
 
 ```sh
 myst build --pdf

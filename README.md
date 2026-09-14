@@ -12,9 +12,9 @@ the group, which continues to publish the baseline model descriptions.
 
 ## Start with a model
 
-Read the [buffer stock model description](models/buffer-stock/template.md)
-or its [PDF](models/buffer-stock/template.pdf), which covers model theory,
-calibration and numerical concerns. The
+Read the [buffer stock model description](models/buffer-stock/model-description.md)
+or its [PDF](models/buffer-stock/model-description.pdf), which covers model theory,
+calibration and numerical solution. The
 [HARK notebook](projects/HARK/BST/tutorial.ipynb) provides a runnable example
 with short explanations; its [instructions](projects/HARK/BST/README.md)
 give the installation and run commands.
