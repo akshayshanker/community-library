@@ -1,7 +1,7 @@
 version: 1
 project:
   title: Buffer stock saving
-  description: Baseline template for the buffer stock saving model in the QuantEcon Community Library
+  description: Model description for buffer stock saving in the QuantEcon Community Library
   license:
     content: CC-BY-4.0
   toc:

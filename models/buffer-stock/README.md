@@ -1,54 +1,48 @@
 # Buffer stock saving
 
 Read the [model description](template.md) or its [three-page PDF](template.pdf)
-for the theory, calibration and numerical considerations. Implementations live
-under `projects/<toolkit>/BST/`. The [HARK notebook](../../projects/HARK/BST/tutorial.ipynb)
-is a runnable example with brief explanations of its code.
-
-The Markdown is the shared model description. Each project maintains its own
-implementation notebook; notebooks are not generated from the model description.
+for the theory, calibration and numerical considerations. Keep the stated
+model and calibration fixed, and choose the solution method, prose and
+runnable format that suit your toolkit. The
+[HARK notebook](../../projects/HARK/BST/tutorial.ipynb) is one example.
 
 ## What to submit
 
-Add your implementation under `projects/<toolkit>/BST/`:
+Add a runnable implementation under `projects/<toolkit>/BST/`. A notebook,
+a MyST document with code, or another format is welcome. Include the code
+and instructions needed to reproduce the results, and identify the authors
+and software versions in your chosen format.
 
-```text
-projects/<toolkit>/BST/
-    tutorial.ipynb
-    metadata.yml
-    results/
-        cfunc.csv
-        scalars.csv
-        conditions.csv
-```
+1. Link to the shared model description and use its calibration. Explain any part of the model that your toolkit cannot represent.
+2. Document the numerical settings and installation and run commands where readers can find them.
+3. Run the implementation from a fresh session and open a pull request adding your project directory.
 
-| File | What to produce |
+## The HARK example
+
+The implementation at `projects/HARK/BST/` uses the following files.
+Their names and arrangement are an example; projects choose their own files.
+
+| File | Content |
 | --- | --- |
-| `tutorial.ipynb` | Runnable implementation with short explanations, figures and computed results. Link to the shared model description. |
-| `metadata.yml` | Toolkit and software versions, implementation authors, model version and numerical settings. |
-| `results/cfunc.csv` | Consumption at the common resource values below. |
-| `results/scalars.csv` | Target resources, MPCs and the two permanent-shock moments below. |
-| `results/conditions.csv` | Whether each of the seven model conditions holds. |
+| `tutorial.ipynb` | Runnable calculations, explanations and figures. |
+| `metadata.yml` | Software versions, model version and numerical settings. |
+| `results/cfunc.csv` | Consumption at a common set of resource values. |
+| `results/scalars.csv` | Target resources, MPCs and permanent-shock moments. |
+| `results/conditions.csv` | The seven model conditions. |
 
-Include an environment file and any code the notebook imports. The HARK
-example has a `solve.py` helper module and optional numerical tests; other
-implementations need only the files required to run their own code.
+HARK also includes an environment file and optional numerical checks.
+The result tables, metadata example and tolerances below are **optional draft
+comparison conventions**. Projects can use them when comparing results or
+choose another way to present their calculations.
 
-## Prepare the implementation
+## Optional comparison files
 
-1. Read the shared model and calibration. Use the HARK notebook as an example of the calculations and outputs, and implement them in your toolkit.
-2. Keep explanations close to the code and link to the model description rather than repeating it. Record numerical choices and explain any departures from the stated model.
-3. Write the result tables from the computed solution and record the settings in `metadata.yml`.
-4. Restart the kernel, run the notebook from beginning to end and save its outputs. Open a pull request adding `projects/<toolkit>/BST/`.
-
-## Result tables
-
-Resources and consumption are normalised by permanent income. Compute expectations
-using the same shock approximation as the solver.
+These tables express resources and consumption relative to permanent income
+and use the solver's shock approximation for expectations.
 
 ### Consumption
 
-Write `results/cfunc.csv` with columns `m,c`, one row for each value
+The HARK file `results/cfunc.csv` has columns `m,c`, with one row for each value
 
 $$
 m\in\{0.25,0.5,0.75,1,1.25,1.5,2,2.5,3,4,5,6,8,10,15,20\}.
@@ -61,7 +55,7 @@ Use the limiting value $\mathrm{c}(0)=0$ at the origin.
 
 ### Target, MPCs and shock moments
 
-Write `results/scalars.csv` with columns `name,value`. Define the absolute
+The HARK file `results/scalars.csv` has columns `name,value`. Define the absolute
 patience factor $\text{Þ}=(\mathsf{R}\beta)^{1/\gamma}$, where $\gamma$ is
 relative risk aversion.
 
@@ -80,10 +74,10 @@ from the mean of the stationary distribution.
 
 ### Conditions
 
-Write `results/conditions.csv` with columns `name,holds`, using `true` or
-`false`. Display the corresponding factors in the notebook.
+The HARK file `results/conditions.csv` has columns `name,holds`, using `true`
+or `false`. Its notebook also displays the corresponding factors.
 
-| Row name | Condition | Factor, required to be below one |
+| Row name | Condition | Factor below one when the condition holds |
 | --- | --- | --- |
 | `FVAC` | Finite value of autarky | $\beta\mathcal{G}^{1-\gamma}\mathbb{E}[\psi^{1-\gamma}]$ |
 | `AIC` | Absolute impatience | $\text{Þ}$ |
@@ -93,10 +87,11 @@ Write `results/conditions.csv` with columns `name,holds`, using `true` or
 | `GIC` | Growth impatience | $\text{Þ}/\mathcal{G}$ |
 | `GICMod` | Strong growth impatience | $(\text{Þ}/\mathcal{G})\mathbb{E}[\psi^{-1}]$ |
 
-## Record authors and numerical settings
+## Optional metadata file
 
-Use this example for `metadata.yml`, replacing the descriptions in angle
-brackets. List the people who wrote the implementation in `authors`.
+Authors and numerical settings can be recorded in the implementation itself.
+For a separate `metadata.yml`, the following example uses the HARK file
+conventions. Replace the descriptions in angle brackets with your details.
 
 ```yaml
 toolkit: "<toolkit name>"
@@ -117,17 +112,16 @@ Describe settings in words if your method has no grid or does not discretise
 the shocks. Retain the source-paper citations and CC-BY attribution, and
 state the licence for your code.
 
-## Comparing implementations
+## Optional comparison tolerances
 
 The [HARK results](../../projects/HARK/BST/results/) provide one comparison.
 Its [numerical checks](../../projects/HARK/BST/checks/sensitivity.md) show
 how grids, shock approximations and interpolation affect the results.
-There is no separate reference implementation.
 
-Version 0.1 uses the following provisional absolute differences to identify
-results that need explanation when comparing implementations:
+The following optional draft thresholds can guide discussion of numerical
+differences between implementations:
 
-| Quantity | Difference requiring explanation |
+| Quantity | Suggested threshold for discussion |
 | --- | --- |
 | Consumption at any common resource value | Greater than 0.02 |
 | Target resources | Greater than 0.02 |
@@ -137,7 +131,7 @@ results that need explanation when comparing implementations:
 
 The two shock moments help explain differences and have no separate
 tolerance. Use each implementation's own shock approximation for the target.
-These comparison conventions remain provisional. The library does not rank
+These conventions remain optional and provisional. The library does not rank
 toolkits or compare run times.
 
 ## Maintaining the model description
@@ -149,5 +143,5 @@ myst build --pdf
 ```
 
 The build requires LaTeX and uses `../../templates/plain_latex_wide/`.
-Edit implementation notebooks directly in their project directories. The
-library website is maintained separately in `docs/`.
+Each project maintains its implementation in its own directory. The library
+website is maintained separately in `docs/`.

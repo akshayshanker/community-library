@@ -28,7 +28,7 @@ BST_DIR = os.path.dirname(HERE)
 sys.path.insert(0, BST_DIR)
 
 from checks import independent_egm as egm
-import solve as rm
+from checks import hark_checks as rm
 
 
 @pytest.fixture(scope="session")
@@ -237,20 +237,21 @@ def test_recorded_hark_values_reproduce(params, agent, cfunc, atoms):
     assert stored["hark_version"] == "0.17.1"
 
 
-def test_solve_script_writes_three_csvs_beside_itself(tmp_path):
-    """The single-file calculation runs without the optional checks directory."""
-    script_dir = tmp_path / "BST"
-    script_dir.mkdir()
-    script = script_dir / "solve.py"
-    shutil.copyfile(os.path.join(BST_DIR, "solve.py"), script)
+def test_hark_checks_module_writes_three_csvs_in_project(tmp_path):
+    """The optional calculation runs as a module and writes project results."""
+    project_dir = tmp_path / "BST"
+    checks_dir = project_dir / "checks"
+    checks_dir.mkdir(parents=True)
+    shutil.copyfile(os.path.join(HERE, "hark_checks.py"), checks_dir / "hark_checks.py")
     run = subprocess.run(
-        [sys.executable, str(script)], cwd=tmp_path,
+        [sys.executable, "-m", "checks.hark_checks"], cwd=project_dir,
         capture_output=True, text=True,
     )
     assert run.returncode == 0, run.stderr
     assert not (tmp_path / "results").exists()
+    assert not (checks_dir / "results").exists()
     assert f"Python {platform.python_version()}" in run.stdout
-    result_dir = script_dir / "results"
+    result_dir = project_dir / "results"
     assert {path.name for path in result_dir.iterdir()} == {
         "cfunc.csv", "scalars.csv", "conditions.csv",
     }

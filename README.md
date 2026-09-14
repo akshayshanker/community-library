@@ -19,10 +19,10 @@ calibration and numerical concerns. The
 with short explanations; its [instructions](projects/HARK/BST/README.md)
 give the installation and run commands.
 
-A buffer stock submission contains a runnable notebook, a short record of
-the authors and numerical settings, and the result files specified in the
-model's [submission list](models/buffer-stock/README.md#what-to-submit).
-Include any additional code or environment files needed to run the notebook.
+Keep the model and calibration fixed, and choose your own prose, solution
+method and runnable format. The [submission guide](models/buffer-stock/README.md#what-to-submit)
+explains where to put an implementation and how to document its use. The
+guide's CSV formats, metadata example and draft comparison tolerances are optional.
 
 The working group has proposed five baseline models. Projects choose one or
 more that their toolkit can solve and also contribute a tutorial on a model
@@ -41,7 +41,7 @@ of their own choosing.
 | Directory | Purpose |
 | --- | --- |
 | `models/<model>/` | The shared model description, its PDF and the submission guide. |
-| `projects/<toolkit>/<model>/` | A runnable implementation notebook, supporting code and results. |
+| `projects/<toolkit>/<model>/` | A runnable implementation in the project's chosen format, with supporting code and results. |
 | `docs/` | The library website. |
 | `templates/` | The page layout used to produce model PDFs. |
 

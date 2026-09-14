@@ -15,7 +15,7 @@ BST_DIR = os.path.dirname(HERE)
 sys.path.insert(0, BST_DIR)
 
 from checks import independent_egm as egm
-import solve as rm
+from checks import hark_checks as rm
 
 
 def hark_run(p, **kw):

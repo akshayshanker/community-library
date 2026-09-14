@@ -1,7 +1,8 @@
-"""Solve the buffer stock baseline in HARK and write the three result CSVs.
+"""Optional HARK baseline calculation for numerical checks and sensitivity.
 
-Run from this directory: python solve.py
-Results are written beside this script in results/.
+Run from projects/HARK/BST: python -m checks.hark_checks
+This writes the three result CSVs to the project's results/ directory.
+The tutorial notebook is self-contained and does not import this module.
 
 Code names map to the template as follows: m is normalised market
 resources, c consumption and a end-of-period assets. psi and theta are
@@ -22,7 +23,8 @@ import numpy as np
 from scipy.optimize import brentq
 
 HERE = os.path.dirname(os.path.abspath(__file__))
-RESULTS = os.path.join(HERE, "results")
+BST_DIR = os.path.dirname(HERE)
+RESULTS = os.path.join(BST_DIR, "results")
 
 
 def baseline_parameters():
@@ -265,7 +267,7 @@ def summarize_solution(params, agent):
 
 
 def compute(a_count=960, shock_count=7, a_max=20.0):
-    """Solve the baseline and return the same report used by the notebook."""
+    """Solve the baseline and return a report for the numerical checks."""
     params = baseline_parameters()
     agent = solve_baseline(params, a_count, shock_count, a_max)
     return summarize_solution(params, agent)
