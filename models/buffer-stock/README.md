@@ -1,22 +1,19 @@
 # Buffer stock saving
 
-A household saves to protect consumption against income risk. We solve the
-infinite-horizon model in Carroll and Shanker's *Theoretical Foundations of
-Buffer Stock Saving* and compare the consumption function and target level
-of resources across toolkits.
+Read the [model description](template.md) or its [three-page PDF](template.pdf)
+for the theory, calibration and numerical considerations. Implementations live
+under `projects/<toolkit>/BST/`. The [HARK notebook](../../projects/HARK/BST/tutorial.ipynb)
+is a runnable example with brief explanations of its code.
 
-The [PDF](template.pdf) gives a concise specification in three sections:
-model theory, calibration and numerical concerns. The [notebook](template.ipynb)
-adds exercises and result reporting for your solution; both are generated
-from [one source](template.md). The current template is **version 0.1, a draft**;
-its [provisional choices](#draft-decisions) are recorded below.
+The Markdown is the shared model description. Each project maintains its own
+implementation notebook; notebooks are not generated from the model description.
 
 ## What to submit
 
-Add one directory named after your toolkit under `models/buffer-stock/`:
+Add your implementation under `projects/<toolkit>/BST/`:
 
 ```text
-<toolkit>/
+projects/<toolkit>/BST/
     tutorial.ipynb
     metadata.yml
     results/
@@ -27,43 +24,86 @@ Add one directory named after your toolkit under `models/buffer-stock/`:
 
 | File | What to produce |
 | --- | --- |
-| `tutorial.ipynb` | Complete the template's code cells, retain the model statement, and explain your method and any differences in the author's notes. Save the figures and comparison output in the notebook. |
-| `metadata.yml` | Name the toolkit and authors, record software versions and numerical settings, and identify the template version. An example appears below. |
-| `results/cfunc.csv` | Report consumption at the 16 common values of normalised market resources. |
-| `results/scalars.csv` | Report the target, the marginal propensity to consume at the target, the two limiting marginal propensities to consume, and two permanent-shock moments. |
-| `results/conditions.csv` | Report whether each of the seven conditions in the lecture holds. |
+| `tutorial.ipynb` | Runnable implementation with short explanations, figures and computed results. Link to the shared model description. |
+| `metadata.yml` | Toolkit and software versions, implementation authors, model version and numerical settings. |
+| `results/cfunc.csv` | Consumption at the common resource values below. |
+| `results/scalars.csv` | Target resources, MPCs and the two permanent-shock moments below. |
+| `results/conditions.csv` | Whether each of the seven model conditions holds. |
 
-Include supporting code and an environment file if the notebook needs them.
-Use your toolkit's usual format, such as `requirements.txt`, `environment.yml`
-or `Project.toml`, and state the installation and run commands at the start
-of the notebook. A separate tutorial document or a second copy of the shared
-reference computation is unnecessary.
+Include an environment file and any code the notebook imports. The HARK
+example has a `solve.py` helper module and optional numerical tests; other
+implementations need only the files required to run their own code.
 
-## Complete the tutorial
+## Prepare the implementation
 
-1. Copy `template.ipynb` into your toolkit directory as `tutorial.ipynb`. Use the notebook kernel appropriate to your language and translate the supplied Python cells when needed. List the implementation authors and retain the template's source-paper citations.
-2. Complete the exercises in order using the stated model and calibration. Explain the numerical method, record the shock approximation and grids, and describe any departures from the model in the author's notes.
-3. Write the three CSV files from your computed results and complete `metadata.yml`. Run the notebook from its own directory so that `results/` refers to the files alongside it. Use the comparison cell to report differences from the reference and explain differences beyond the stated tolerances.
-4. Restart the kernel and run the completed notebook from beginning to end. Save its outputs and open a pull request adding your toolkit directory.
+1. Read the shared model and calibration. Use the HARK notebook as an example of the calculations and outputs, and implement them in your toolkit.
+2. Keep explanations close to the code and link to the model description rather than repeating it. Record numerical choices and explain any departures from the stated model.
+3. Write the result tables from the computed solution and record the settings in `metadata.yml`.
+4. Restart the kernel, run the notebook from beginning to end and save its outputs. Open a pull request adding `projects/<toolkit>/BST/`.
 
-The result tables let readers compare the same economic objects even when
-the toolkits use different notation or solution methods. A difference beyond
-a tolerance should be reported and explained; it does not automatically
-exclude a contribution. The library publishes no timings or toolkit ranking
-in this first phase.
+## Result tables
+
+Resources and consumption are normalised by permanent income. Compute expectations
+using the same shock approximation as the solver.
+
+### Consumption
+
+Write `results/cfunc.csv` with columns `m,c`, one row for each value
+
+$$
+m\in\{0.25,0.5,0.75,1,1.25,1.5,2,2.5,3,4,5,6,8,10,15,20\}.
+$$
+
+Plot consumption over $m\in[0,20]$ and check that it is increasing and
+concave. The limiting MPCs below give the bounds
+$\underline\kappa m\leq\mathrm{c}(m)\leq\overline\kappa m$.
+Use the limiting value $\mathrm{c}(0)=0$ at the origin.
+
+### Target, MPCs and shock moments
+
+Write `results/scalars.csv` with columns `name,value`. Define the absolute
+patience factor $\text{Þ}=(\mathsf{R}\beta)^{1/\gamma}$, where $\gamma$ is
+relative risk aversion.
+
+| Row name | Quantity |
+| --- | --- |
+| `m_target` | Target $\hat m$ solving the model's conditional expected resource-growth equation. |
+| `mpc_at_target` | $[\mathrm{c}(\hat m+h)-\mathrm{c}(\hat m-h)]/(2h)$ with $h=0.01$. |
+| `kappa_min` | $\underline\kappa=\max\{0,1-\text{Þ}/\mathsf{R}\}$. |
+| `kappa_max` | $\overline\kappa=1-\wp^{1/\gamma}\text{Þ}/\mathsf{R}$. |
+| `E_psi_inv` | $\mathbb{E}[\psi^{-1}]$ under the solver's shock approximation. |
+| `E_psi_1mrho` | $\mathbb{E}[\psi^{1-\gamma}]$ under the solver's shock approximation. The existing CSV name uses `rho` for $\gamma$. |
+
+Check that expected resource growth is positive at $\hat m-0.5$ and negative
+at $\hat m+0.5$. The target differs from a balanced-growth pseudo-target and
+from the mean of the stationary distribution.
+
+### Conditions
+
+Write `results/conditions.csv` with columns `name,holds`, using `true` or
+`false`. Display the corresponding factors in the notebook.
+
+| Row name | Condition | Factor, required to be below one |
+| --- | --- | --- |
+| `FVAC` | Finite value of autarky | $\beta\mathcal{G}^{1-\gamma}\mathbb{E}[\psi^{1-\gamma}]$ |
+| `AIC` | Absolute impatience | $\text{Þ}$ |
+| `RIC` | Return impatience | $\text{Þ}/\mathsf{R}$ |
+| `WRIC` | Weak return impatience | $\wp^{1/\gamma}\text{Þ}/\mathsf{R}$ |
+| `FHWC` | Finite human wealth | $\mathcal{G}/\mathsf{R}$ |
+| `GIC` | Growth impatience | $\text{Þ}/\mathcal{G}$ |
+| `GICMod` | Strong growth impatience | $(\text{Þ}/\mathcal{G})\mathbb{E}[\psi^{-1}]$ |
 
 ## Record authors and numerical settings
 
-Copy the following example into `metadata.yml` and replace the descriptions
-in angle brackets. The `authors` entries credit the people who wrote the
-implementation. The template source and version identify the model and
-reporting conventions you used.
+Use this example for `metadata.yml`, replacing the descriptions in angle
+brackets. List the people who wrote the implementation in `authors`.
 
 ```yaml
 toolkit: "<toolkit name>"
 toolkit_version: "<version>"
 authors:
   - name: "<implementation author>"
+model: "BST"
 date: "<YYYY-MM-DD>"
 template_version: "0.1"
 template_source: "https://github.com/QuantEcon/community-library/tree/main/models/buffer-stock"
@@ -74,123 +114,40 @@ grid: "<grid variables, bounds, number of points, and spacing>"
 ```
 
 Describe settings in words if your method has no grid or does not discretise
-the shocks. Retain the source-paper citation and CC-BY attribution in the
-notebook, and state the licence for your code.
+the shocks. Retain the source-paper citations and CC-BY attribution, and
+state the licence for your code.
 
-## Write the result tables
+## Comparing implementations
 
-Use the column and row names shown here. Replace every blank entry with a
-computed number, or with `true` or `false` in `conditions.csv`. The names are
-shared across submissions even when your toolkit uses other names internally.
+The [HARK results](../../projects/HARK/BST/results/) provide one comparison.
+Its [numerical checks](../../projects/HARK/BST/checks/sensitivity.md) show
+how grids, shock approximations and interpolation affect the results.
+There is no separate reference implementation.
 
-### Consumption
+Version 0.1 uses the following provisional absolute differences to identify
+results that need explanation when comparing implementations:
 
-The columns of `results/cfunc.csv` are `m` and `c`, both normalised by
-permanent income. Include one row at each of the common resource values:
+| Quantity | Difference requiring explanation |
+| --- | --- |
+| Consumption at any common resource value | Greater than 0.02 |
+| Target resources | Greater than 0.02 |
+| MPC at the target | Greater than 0.01 |
+| Either limiting MPC | Greater than $10^{-6}$ |
+| Any condition result | Disagreement |
 
-```csv
-m,c
-0.25,
-0.5,
-0.75,
-1,
-1.25,
-1.5,
-2,
-2.5,
-3,
-4,
-5,
-6,
-8,
-10,
-15,
-20,
-```
+The two shock moments help explain differences and have no separate
+tolerance. Use each implementation's own shock approximation for the target.
+These comparison conventions remain provisional. The library does not rank
+toolkits or compare run times.
 
-### Target, marginal propensities to consume and shock moments
+## Maintaining the model description
 
-The columns of `results/scalars.csv` are `name` and `value`:
-
-```csv
-name,value
-m_target,
-mpc_at_target,
-kappa_min,
-kappa_max,
-E_psi_inv,
-E_psi_1mrho,
-```
-
-The first two rows report the target resources and the marginal propensity
-to consume there, measured by the central difference with step 0.01. The
-next two rows report the limiting marginal propensities to consume at high
-and low resources. The last two rows report the expected inverse permanent
-shock and the expected permanent shock raised to one minus relative risk
-aversion, under the shock approximation used to solve your model. Their
-formulas and reference values appear in the lecture.
-
-### Conditions
-
-The columns of `results/conditions.csv` are `name` and `holds`. Enter `true`
-when the named condition holds under your numerical settings and `false`
-otherwise; the lecture defines each condition and its factor.
-
-```csv
-name,holds
-FVAC,
-AIC,
-RIC,
-WRIC,
-FHWC,
-GIC,
-GICMod,
-```
-
-Report the computed factors in the notebook. The CSV records the seven
-yes/no results, which all equal `true` in the reference computation.
-
-## Draft decisions
-
-Version 0.1 uses the comparison tolerances stated in the lecture. Confirming
-those tolerances remains an open decision before the template can be
-finalised, because different shock approximations change the reference
-comparisons.
-
-The target currently uses each implementation's own approximation to the
-permanent-shock distribution. Whether all implementations should instead
-use the continuous distribution for the target calculation also remains
-open. The current choice gives a reference target of 1.3910; using the
-continuous inverse-shock moment gives 1.3920. Use the stated version 0.1
-choice when preparing a submission and identify that version in the metadata.
-
-The initial draft was dated 11 September 2026. The current revision changes
-the exposition and contribution instructions while retaining the model,
-calibration and reported reference values.
-
-## Maintaining the shared template
-
-The lecture source is `template.md`; `template.ipynb` and `template.pdf` are
-generated from it. From `models/buffer-stock/`, regenerate
-the notebook with:
-
-```sh
-jupytext --to ipynb template.md
-```
-
-Use the one-way command so notebook generation does not rewrite the lecture
-source. Build the PDF and a local HTML version with:
+Edit `template.md` and build its PDF from `models/buffer-stock/`:
 
 ```sh
 myst build --pdf
-myst build --html
 ```
 
-The PDF build requires LaTeX and uses the shared page layout in
-`../../templates/plain_latex_wide/`. The `myst.yml` file configures the local
-lecture build; the library website is maintained separately in `docs/`.
-
-The [reference directory](reference/README.md) contains the computation,
-recorded values, tests and sensitivity study. Those files support the shared
-comparison values; toolkit authors need only the lecture and the submission
-instructions to prepare their contribution.
+The build requires LaTeX and uses `../../templates/plain_latex_wide/`.
+Edit implementation notebooks directly in their project directories. The
+library website is maintained separately in `docs/`.

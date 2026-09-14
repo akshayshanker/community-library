@@ -1,4 +1,4 @@
-"""Tests for the buffer stock reference computation.
+"""Tests for the buffer stock HARK implementation.
 
 Oracles, with provenance:
   * the seven calibrated parameters: Tables/Parameters.tex of the paper;
@@ -21,12 +21,11 @@ import sys
 
 import numpy as np
 import pytest
-from scipy.optimize import brentq
 
 HERE = os.path.dirname(os.path.abspath(__file__))
-REFERENCE_DIR = os.path.dirname(HERE)
-# Allow the checks to run from either the reference or repository directory.
-sys.path.insert(0, REFERENCE_DIR)
+BST_DIR = os.path.dirname(HERE)
+# Allow the checks to run from either the HARK implementation or repository directory.
+sys.path.insert(0, BST_DIR)
 
 from checks import independent_egm as egm
 import solve as rm
@@ -84,8 +83,8 @@ def test_shock_discretisation_is_mean_one_with_zero_income_event(atoms, params):
     assert abs((prob * theta).sum() - 1.0) < 1e-12
     zero = theta == 0.0
     assert abs(prob[zero].sum() - params["wp"]) < 1e-12
-    # The paper's process: theta = Theta / (1 - wp) with E[Theta] = 1 when
-    # income is not zero.
+    # Code theta is the paper's full transitory shock, bold xi. Conditional
+    # on positive income, its mean is 1 / (1 - wp).
     cond_mean = (prob[~zero] * theta[~zero]).sum() / prob[~zero].sum()
     assert abs(cond_mean - 1.0 / (1.0 - params["wp"])) < 1e-12
 
@@ -99,9 +98,20 @@ def test_derived_factors_match_paper_table(params):
         assert abs(factors[key] - value) < 5e-4, (key, factors[key], value)
 
 
-def test_conditions_hold_at_baseline_and_agree_with_hark(params, agent):
-    e_psi_inv, e_psi_1mrho = rm.exact_lognormal_moments(params["sigma_psi"], params["rho"])
-    checks = rm.condition_checks(rm.derived_factors(params, e_psi_inv, e_psi_1mrho))
+def test_conditions_hold_at_baseline_and_agree_with_hark(params, agent, atoms):
+    out = rm.summarize_solution(params, agent)
+    psi, _, prob = atoms
+    e_psi_inv = float((prob / psi).sum())
+    e_psi_1mrho = float((prob * psi ** (1 - params["rho"])).sum())
+    assert out["E_psi_inv_discretised"] == pytest.approx(e_psi_inv, abs=1e-14)
+    assert out["E_psi_1mrho_discretised"] == pytest.approx(e_psi_1mrho, abs=1e-14)
+    # The finite shock law differs from the continuous lognormal law. Reports
+    # must use the former even though both give the same Boolean conditions.
+    assert abs(out["E_psi_inv_exact"] - e_psi_inv) > 1e-4
+    assert out["derived_factors"] == pytest.approx(
+        rm.derived_factors(params, e_psi_inv, e_psi_1mrho), rel=1e-13, abs=1e-14,
+    )
+    checks = out["conditions"]
     for name in ["FVAC", "AIC", "RIC", "WRIC", "GIC", "GICMod", "FHWC"]:
         assert checks[name] is True, name
     hark = agent.conditions
@@ -207,10 +217,13 @@ def test_euler_residuals_small_on_grid(params, cfunc, atoms):
     assert np.all(log10_resid < -3.0), log10_resid
 
 
-def test_committed_reference_values_reproduce(params, agent, cfunc, atoms):
-    path = os.path.join(REFERENCE_DIR, "results", "reference_values.json")
-    if not os.path.exists(path):
-        pytest.fail("reference_values.json has not been written yet")
+def test_recorded_hark_values_reproduce(params, agent, cfunc, atoms):
+    """Keep the historical numerical record unchanged as a test fixture.
+
+    Its derived factors used continuous lognormal moments; the current
+    CSVs use the discrete moments, checked separately above.
+    """
+    path = os.path.join(HERE, "expected.json")
     with open(path) as f:
         stored = json.load(f)
     psi, theta, prob = atoms
@@ -224,32 +237,55 @@ def test_committed_reference_values_reproduce(params, agent, cfunc, atoms):
     assert stored["hark_version"] == "0.17.1"
 
 
-def test_solve_script_writes_reference_results_beside_itself(tmp_path):
+def test_solve_script_writes_three_csvs_beside_itself(tmp_path):
     """The single-file calculation runs without the optional checks directory."""
-    script_dir = tmp_path / "reference"
+    script_dir = tmp_path / "BST"
     script_dir.mkdir()
     script = script_dir / "solve.py"
-    shutil.copyfile(os.path.join(REFERENCE_DIR, "solve.py"), script)
+    shutil.copyfile(os.path.join(BST_DIR, "solve.py"), script)
     run = subprocess.run(
         [sys.executable, str(script)], cwd=tmp_path,
         capture_output=True, text=True,
     )
     assert run.returncode == 0, run.stderr
     assert not (tmp_path / "results").exists()
-    with open(script_dir / "results" / "reference_values.json") as f:
-        fresh = json.load(f)
-    with open(os.path.join(REFERENCE_DIR, "results", "reference_values.json")) as f:
+    assert f"Python {platform.python_version()}" in run.stdout
+    result_dir = script_dir / "results"
+    assert {path.name for path in result_dir.iterdir()} == {
+        "cfunc.csv", "scalars.csv", "conditions.csv",
+    }
+    with open(os.path.join(HERE, "expected.json")) as f:
         stored = json.load(f)
-    assert fresh["python"] == platform.python_version()
-    assert fresh["conditions"] == stored["conditions"]
-    for name in ("c_on_grid", "m_target", "mpc_at_target", "kappa_min", "kappa_max"):
-        # The same HARK calibration should reproduce the stored values;
-        # 1e-10 allows differences from numerical library versions.
-        np.testing.assert_allclose(fresh[name], stored[name], rtol=0, atol=1e-10)
-    with open(script_dir / "results" / "reference_cfunc.csv") as f:
-        rows = list(csv.DictReader(f))
+    with open(result_dir / "cfunc.csv") as f:
+        reader = csv.DictReader(f)
+        assert reader.fieldnames == ["m", "c"]
+        rows = list(reader)
     assert [float(row["m"]) for row in rows] == stored["grid"]
-    # The CSV writes ten decimal places, so its rounding error is at most 5e-11.
     np.testing.assert_allclose(
-        [float(row["c"]) for row in rows], fresh["c_on_grid"], rtol=0, atol=5.1e-11,
+        [float(row["c"]) for row in rows], stored["c_on_grid"], rtol=0, atol=1e-10,
     )
+    with open(result_dir / "scalars.csv") as f:
+        reader = csv.DictReader(f)
+        assert reader.fieldnames == ["name", "value"]
+        rows = list(reader)
+    assert [row["name"] for row in rows] == [
+        "m_target", "mpc_at_target", "kappa_min", "kappa_max", "E_psi_inv", "E_psi_1mrho",
+    ]
+    scalars = {row["name"]: float(row["value"]) for row in rows}
+    for name in ("m_target", "mpc_at_target", "kappa_min", "kappa_max"):
+        # Preserve the established calibration and step-0.01 target MPC;
+        # 1e-10 allows differences from numerical library versions.
+        assert abs(scalars[name] - stored[name]) < 1e-10
+    assert abs(scalars["E_psi_inv"] - stored["E_psi_inv_discretised"]) < 1e-12
+    # At baseline rho = 2, the two required discrete moments coincide.
+    assert abs(scalars["E_psi_1mrho"] - scalars["E_psi_inv"]) < 1e-12
+    with open(result_dir / "conditions.csv") as f:
+        reader = csv.DictReader(f)
+        assert reader.fieldnames == ["name", "holds"]
+        rows = list(reader)
+    assert [row["name"] for row in rows] == [
+        "FVAC", "AIC", "RIC", "WRIC", "FHWC", "GIC", "GICMod",
+    ]
+    assert {row["name"]: row["holds"] for row in rows} == {
+        name: str(value).lower() for name, value in stored["conditions"].items()
+    }

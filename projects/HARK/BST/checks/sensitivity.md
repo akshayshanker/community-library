@@ -1,8 +1,8 @@
-# Sensitivity of the reference values
+# Sensitivity of the HARK baseline
 
-Baseline: HARK, seven positive values per shock plus zero transitory income (56 joint outcomes), 960 asset points, asset grid top 20. Differences are maximum absolute differences of c(m) over the common grid, and absolute differences of the target and of the MPC at the target.
+HARK baseline: seven positive values per shock plus zero transitory income (56 joint outcomes), 960 asset points, asset grid top 20. The tables compare consumption on the common grid, target wealth and the MPC at the target. Target differences retain their sign.
 
-## 1. Baseline against the independent EGM solver (same 56 joint shock outcomes, 12,000 knots to a = 50)
+## 1. HARK baseline against the independent EGM solver (same 56 joint shock outcomes, 12,000 knots to a = 50)
 
 | m | HARK | EGM | difference |
 | --- | --- | --- | --- |

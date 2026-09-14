@@ -1,4 +1,4 @@
-"""Solve the buffer stock baseline in HARK and write its reference results.
+"""Solve the buffer stock baseline in HARK and write the three result CSVs.
 
 Run from this directory: python solve.py
 Results are written beside this script in results/.
@@ -13,8 +13,8 @@ is Carroll and Shanker, "Theoretical Foundations of Buffer Stock Saving";
 equation and table names refer to its LaTeX source.
 """
 import copy
+import csv
 import datetime
-import json
 import os
 import platform
 
@@ -74,6 +74,7 @@ def hark_parameters(params, a_count=960, shock_count=7, a_max=20.0):
             "aXtraNestFac": 3,
             "CubicBool": False,              # linear interpolation of c
             "vFuncBool": False,
+            "tolerance": 1e-6,
         }
     )
     return p
@@ -179,8 +180,8 @@ def mpc_central_difference(cfunc, m, step=1e-4):
 
 
 def euler_residuals(cfunc, grid, params, psi, theta, prob):
-    """log10 of the relative Euler residual at each grid point, from the
-    normalised Euler equation c^-rho = R beta E[(G psi')^-rho c'^-rho]."""
+    """log10 of the consumption-equivalent relative Euler residual:
+    abs(c_implied / c - 1), where c_implied inverts the Euler right side."""
     G, R, beta, rho = (params[k] for k in ("G", "R", "beta", "rho"))
     c = np.asarray(cfunc(grid), dtype=float)
     a = grid - c
@@ -192,22 +193,28 @@ def euler_residuals(cfunc, grid, params, psi, theta, prob):
     return np.log10(np.abs(c_implied / c - 1.0))
 
 
-def compute(a_count=960, shock_count=7, a_max=20.0):
+def summarize_solution(params, agent):
+    """Report a solved HARK agent using its discretised shock distribution.
+
+    First call agent.solve(), agent.check_conditions(verbose=False), and
+    agent.calc_stable_points(), as in solve_baseline(). Exact lognormal
+    moments are included only as diagnostics for the shock approximation.
+    """
     import HARK
     import scipy
 
-    p = baseline_parameters()
-    agent = solve_baseline(p, a_count, shock_count, a_max)
+    p = dict(params)
     s = agent.solution[0]
     cfunc = s.cFunc
     psi, theta, prob = shock_atoms(agent)
     e_psi_inv_disc = float((prob * psi**-1).sum())
+    e_psi_1mrho_disc = float((prob * psi ** (1.0 - p["rho"])).sum())
     e_psi_inv, e_psi_1mrho = exact_lognormal_moments(p["sigma_psi"], p["rho"])
     grid = evaluation_grid()
     c = np.asarray(cfunc(grid), dtype=float)
     m_hat = target_wealth(cfunc, p, e_psi_inv_disc)
     kappa_min, kappa_max = limiting_mpcs(p)
-    factors = derived_factors(p, e_psi_inv, e_psi_1mrho)
+    factors = derived_factors(p, e_psi_inv_disc, e_psi_1mrho_disc)
     return {
         "template_version": "0.1",
         "computed_on": datetime.date.today().isoformat(),
@@ -217,12 +224,12 @@ def compute(a_count=960, shock_count=7, a_max=20.0):
         "scipy": scipy.__version__,
         "parameters": p,
         "solver_settings": {
-            "shock_atoms_per_dimension": shock_count,
-            "asset_grid_points": a_count,
-            "asset_grid_max": a_max,
-            "asset_grid_min": 0.001,
-            "asset_grid_nesting": 3,
-            "interpolation": "linear",
+            "shock_atoms_per_dimension": agent.PermShkCount,
+            "asset_grid_points": agent.aXtraCount,
+            "asset_grid_max": agent.aXtraMax,
+            "asset_grid_min": agent.aXtraMin,
+            "asset_grid_nesting": agent.aXtraNestFac,
+            "interpolation": "cubic" if agent.CubicBool else "linear",
             "convergence_tolerance": agent.tolerance,
             "horizon": "infinite (cycles = 0)",
         },
@@ -240,6 +247,8 @@ def compute(a_count=960, shock_count=7, a_max=20.0):
         "conditions": condition_checks(factors),
         "E_psi_inv_exact": e_psi_inv,
         "E_psi_inv_discretised": e_psi_inv_disc,
+        "E_psi_1mrho_exact": e_psi_1mrho,
+        "E_psi_1mrho_discretised": e_psi_1mrho_disc,
         "hark_cross_checks": {
             "mNrmTrg": float(s.mNrmTrg),
             "mNrmStE": float(s.mNrmStE),
@@ -255,15 +264,37 @@ def compute(a_count=960, shock_count=7, a_max=20.0):
     }
 
 
+def compute(a_count=960, shock_count=7, a_max=20.0):
+    """Solve the baseline and return the same report used by the notebook."""
+    params = baseline_parameters()
+    agent = solve_baseline(params, a_count, shock_count, a_max)
+    return summarize_solution(params, agent)
+
+
+def write_results(out, directory=RESULTS):
+    """Write cfunc.csv, scalars.csv and conditions.csv in directory."""
+    os.makedirs(directory, exist_ok=True)
+    with open(os.path.join(directory, "cfunc.csv"), "w", newline="") as f:
+        writer = csv.writer(f, lineterminator="\n")
+        writer.writerow(["m", "c"])
+        writer.writerows(zip(out["grid"], out["c_on_grid"]))
+    with open(os.path.join(directory, "scalars.csv"), "w", newline="") as f:
+        writer = csv.writer(f, lineterminator="\n")
+        writer.writerow(["name", "value"])
+        for name in ("m_target", "mpc_at_target", "kappa_min", "kappa_max"):
+            writer.writerow([name, out[name]])
+        writer.writerow(["E_psi_inv", out["E_psi_inv_discretised"]])
+        writer.writerow(["E_psi_1mrho", out["E_psi_1mrho_discretised"]])
+    with open(os.path.join(directory, "conditions.csv"), "w", newline="") as f:
+        writer = csv.writer(f, lineterminator="\n")
+        writer.writerow(["name", "holds"])
+        for name in ("FVAC", "AIC", "RIC", "WRIC", "FHWC", "GIC", "GICMod"):
+            writer.writerow([name, str(out["conditions"][name]).lower()])
+
+
 def main():
     out = compute()
-    os.makedirs(RESULTS, exist_ok=True)
-    with open(os.path.join(RESULTS, "reference_values.json"), "w") as f:
-        json.dump(out, f, indent=2)
-    with open(os.path.join(RESULTS, "reference_cfunc.csv"), "w") as f:
-        f.write("m,c\n")
-        for m, c in zip(out["grid"], out["c_on_grid"]):
-            f.write(f"{m:g},{c:.10f}\n")
+    write_results(out)
     print(f"HARK {out['hark_version']}, Python {out['python']}, numpy {out['numpy']}, scipy {out['scipy']}")
     print("m       c(m)")
     for m, c in zip(out["grid"], out["c_on_grid"]):
